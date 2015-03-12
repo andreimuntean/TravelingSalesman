@@ -2,8 +2,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * Calculates the shortest cycle which visits every node of a graph.
@@ -22,7 +24,7 @@ public class TravelingSalesman
     private static int allNodes;
 
     // The value neighbors[node] stores the neighbors of node.
-    private static ArrayList<Integer>[] neighbors;
+    private static Set<Integer>[] neighbors;
 
     // The value costs[firstNode][secondNode] stores the cost of getting from firstNode to secondNode.
     private static int[][] costs;
@@ -34,7 +36,7 @@ public class TravelingSalesman
     private static int[][] paths;
 
     // Calculates the unsigned minimum of two numbers.
-    // Negative numbers will be read as Integer.MAX_VALUE.
+    // Negative numbers will be evaluated as Integer.MAX_VALUE.
     private static int unsignedMin(int firstValue, int secondValue)
     {
         firstValue = firstValue < 0 ? Integer.MAX_VALUE : firstValue;
@@ -68,7 +70,7 @@ public class TravelingSalesman
     }
 
     // Gets a list with the neighbors of node.
-    private static ArrayList<Integer> getNeighbors(int node)
+    private static Set<Integer> getNeighbors(int node)
     {
         return neighbors[node];
     }
@@ -113,11 +115,11 @@ public class TravelingSalesman
         }
 
         // Initializes the array of neighbors.
-        neighbors = new ArrayList[nodeCount];
+        neighbors = new Set[nodeCount];
 
         for (int nodeIndex = 0; nodeIndex < nodeCount; ++nodeIndex)
         {
-            neighbors[nodeIndex] = new ArrayList<Integer>();
+            neighbors[nodeIndex] = new HashSet<Integer>();
         }
 
         // Initializes the paths.
@@ -187,9 +189,9 @@ public class TravelingSalesman
     }
 
     // Gets the shortest cycle which traverses the entire graph.
-    private static ArrayList<int[]> getShortestCycle()
+    private static LinkedHashSet<int[]> getShortestCycle()
     {
-        ArrayList<int[]> shortestCycle = new ArrayList<int[]>(nodeCount);
+        LinkedHashSet<int[]> shortestCycle = new LinkedHashSet<int[]>(nodeCount);
         int minimumCost = getMinimumCost();
 
         for (int node = 1; node < nodeCount; ++node)
@@ -211,7 +213,7 @@ public class TravelingSalesman
                 }
 
                 // Completes the cycle.
-                shortestCycle.add(new int[] { node, shortestCycle.get(0)[0] });
+                shortestCycle.add(new int[] { node, shortestCycle.iterator().next()[0] });
 
                 // Stops searching for nodes.
                 break;
@@ -222,6 +224,7 @@ public class TravelingSalesman
     }
 
     // Reads input from the specified path. Reads from standard input if the specified path is the empty string.
+    // Reads the nodeCount, edgeCount and then a list of edgeCount edges (each with an associated cost).
     private static void read(String path) throws IOException
     {
         try (Scanner scanner = path.isEmpty() ? new Scanner(System.in) : new Scanner(new FileReader(path)))
@@ -243,6 +246,7 @@ public class TravelingSalesman
     }
 
     // Writes the result to the specified path. Outputs to standard output if the specified path is the empty string.
+    // Outputs the minimum cost and then a list of nodeCount edges that form the minimal cycle.
     private static void write(String path) throws IOException
     {
         try (PrintWriter printWriter = path.isEmpty() ? new PrintWriter(System.out) : new PrintWriter(new FileWriter(path)))
@@ -255,7 +259,7 @@ public class TravelingSalesman
             
                 for (int[] pair : getShortestCycle())
                 {
-                    printWriter.printf("(%d, %d) ", pair[0], pair[1]);
+                    printWriter.printf("(%d, %d)%n", pair[0], pair[1]);
                 }
 
                 printWriter.println();
